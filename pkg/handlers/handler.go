@@ -22,24 +22,30 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		auth.POST("/sign-in", h.signIn)
 	}
 
-	api := router.Group("/api")
+	api := router.Group("/api", h.signIn) // Требуется только аутентификация
 	{
-		menus := api.Group("/menus")
+		// Публичные элементы меню (доступны всем)
+		menu := api.Group("/menu-items")
 		{
-			menus.POST("/", h.createMenu)
-			menus.GET("/", h.getAllMenus)
-			menus.GET("/:menu_id", h.getMenu)
-			menus.PUT("/:menu_id", h.updateMenu)
-			menus.DELETE("/:menu_id", h.deleteMenu)
+			menu.GET("/", h.getAllMenuItems)
+			menu.GET("/:item_id", h.getMenuItem)
+		}
 
-			items := menus.Group("/:menu_id/items")
-			{
-				items.GET("/", h.getMenuItems)
-				items.POST("/", h.createMenuItem)
-				items.GET("/:item_id", h.getMenuItem)
-				items.PUT("/:item_id", h.updateMenuItem)
-				items.DELETE("/:item_id", h.deleteMenuItem)
-			}
+		// Управление комнатами (доступно всем аутентифицированным пользователям)
+		rooms := api.Group("/rooms")
+		{
+			rooms.POST("/", h.createRoom)           // Создать комнату (стать ГМ)
+			rooms.GET("/my", h.getUserRooms)        // Получить свои комнаты
+			rooms.GET("/:room_id", h.getRoom)       // Просмотр любой комнаты
+			rooms.PUT("/:room_id", h.updateRoom)    // Изменить свою комнату
+			rooms.DELETE("/:room_id", h.deleteRoom) // Удалить свою комнату
+		}
+
+		// Персональные настройки меню
+		user := api.Group("/user")
+		{
+			user.GET("/menu", h.getUserMenu)
+			user.PUT("/menu", h.updateUserMenu)
 		}
 	}
 

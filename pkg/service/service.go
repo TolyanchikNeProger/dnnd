@@ -1,8 +1,13 @@
 package service
 
-import "github.com/TolyanchikNeProger/dnnd/pkg/repository"
+import (
+	"github.com/TolyanchikNeProger/dnnd"
+	"github.com/TolyanchikNeProger/dnnd/pkg/repository"
+)
 
 type Authorization interface {
+	CreateUser(user dnnd.User) (int, error)
+	GenerateToken(username, password string) (string, error)
 }
 
 type Menu interface {
@@ -18,5 +23,7 @@ type Service struct {
 }
 
 func NewService(repos *repository.Repository) *Service {
-	return &Service{}
+	return &Service{
+		Authorization: NewAuthService(repos.Authorization),
+	}
 }
